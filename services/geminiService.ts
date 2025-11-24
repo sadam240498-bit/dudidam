@@ -1,0 +1,58 @@
+import { GoogleGenAI } from "@google/genai";
+
+// Initialize the client
+// API Key is strictly from process.env.API_KEY
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+/**
+ * Edits an image based on a text prompt using Gemini 2.5 Flash Image.
+ * 
+ * @param base64Image The source image in base64 format (without prefix)
+ * @param mimeType The mime type of the source image
+ * @param prompt The user's instruction (e.g., "Add a retro filter")
+ * @returns The base64 data of the generated image
+ */
+export const editImageWithGemini = async (
+  base64Image: string,
+  mimeType: string,
+  prompt: string
+): Promise<string | null> => {
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-image',
+      contents: {
+        parts: [
+          {
+            text: `Edit this image: ${prompt}. Return the result as a generated image.`,
+          },
+          {
+            inlineData: {
+              data: base64Image,
+              mimeType: mimeType,
+            },
+          },
+        ],
+      },
+      // config: {
+        // Nano banana models do not support responseMimeType or responseSchema
+      // }
+    });
+
+    // Iterate through parts to find the image
+    const parts = response.candidates?.[0]?.content?.parts;
+    if (parts) {
+      for (const part of parts) {
+        if (part.inlineData && part.inlineData.data) {
+          return part.inlineData.data;
+        }
+      }
+    }
+    
+    console.warn("No image found in Gemini response");
+    return null;
+
+  } catch (error) {
+    console.error("Error editing image with Gemini:", error);
+    throw error;
+  }
+};

@@ -1,0 +1,9 @@
+{
+  "name": "Copy of SIM-PKL Integrated",
+  "description": "A comprehensive Management Information System for Vocational Field Work (PKL) featuring real-time attendance, reporting, and AI-powered image editing.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
